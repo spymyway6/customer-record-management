@@ -11,8 +11,10 @@ if (!defined('ABSPATH')) {
 }
 
 // Activation Hook: Create Table if it doesn’t exist
-register_activation_hook(__FILE__, 'create_customer_records');
-register_activation_hook(__FILE__, 'create_sell_to_customer');
+// register_activation_hook(__FILE__, 'create_customer_records');
+// register_activation_hook(__FILE__, 'create_sell_to_customer');
+
+
 
 function create_customer_records() {
     global $wpdb;
@@ -27,10 +29,10 @@ function create_customer_records() {
             retail_locator_status TEXT NOT NULL,
             display TEXT NOT NULL,
             discount_group TEXT NOT NULL,
-            ytd_sales DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-            prev_ytd_sales DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-            discount_amount_level DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-            account_balance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            ytd_sales TEXT NOT NULL,
+            prev_ytd_sales TEXT NOT NULL,
+            discount_amount_level TEXT NOT NULL,
+            account_balance TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) $charset_collate;";
@@ -51,9 +53,9 @@ function create_sell_to_customer() {
             id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             sell_to_customer_no BIGINT(20) NOT NULL,
             document_type TEXT NOT NULL,
-            document_no BIGINT(20) NOT NULL,
-            amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-            remaining_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            document_no TEXT NOT NULL,
+            amount TEXT NOT NULL,
+            remaining_amount TEXT NOT NULL,
             due_date DATE DEFAULT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -63,6 +65,20 @@ function create_sell_to_customer() {
         dbDelta($sql);
     }
 }
+
+// Ensure tables exist on every load
+function ensure_tables_exist() {
+    create_customer_records();
+    create_sell_to_customer();
+}
+
+// Run on activation
+register_activation_hook(__FILE__, 'ensure_tables_exist');
+
+// Run on admin initialization (so tables are created if missing)
+add_action('admin_init', 'ensure_tables_exist');
+
+
 require_once plugin_dir_path(__FILE__) . 'core/_common_functions.php';
 require_once plugin_dir_path(__FILE__) . 'core/_customer_functions.php';
 
@@ -97,11 +113,3 @@ function customer_records_manager_enqueue_assets_styles($hook) {
 }
 add_action('admin_enqueue_scripts', 'customer_records_manager_enqueue_assets_styles');
 
-
-
-
-
-
-
-
-?>

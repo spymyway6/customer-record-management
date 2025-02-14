@@ -2,6 +2,7 @@
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_customer_records'])) {
         $allowed_extensions = ['csv', 'xls', 'xlsx'];
         $errors = [];
+        $message = '';
 
         $customer_file_uploaded = !empty($_FILES['customer_record_files']['name']);
 
@@ -40,11 +41,12 @@
                 }
 
                 if($customer_data){
-                    
-                    // Apply Logic for saving data to database
-                    echo "<pre>";
-                    print_r($customer_data);
-                    echo "</pre>";
+                    $has_inserted = process_csv_data($customer_data);
+                    if($has_inserted){
+                        echo '<div class="updated"><p>'.$has_inserted.'</p></div>';
+                    }else{
+                        echo '<div class="error"><ul><li>There was a problem inserting your data, maybe the CSV format headers is invalid or empty. Please check your file and try again.</li></ul></div>';
+                    }
                 }
             }
         }
@@ -57,7 +59,7 @@
             }
             echo '<div class="error"><ul>'.$err_list.'</ul></div>';
         } else {
-            echo '<div class="updated"><p>Files uploaded successfully.</p></div>';
+           
         }
     }
 ?>
@@ -67,18 +69,18 @@
         <h4 class="crmt-title">File Uploader and FTP tools</h4>
     </div>
     <div class="crm-tools-content">
-        <div class="crm-status-badge">
+        <!-- <div class="crm-status-badge">
             <span class="cbadge crm-success" title="Done uploaded today"><i class="dashicons dashicons-yes"></i> Customers</span>
             <span class="cbadge crm-danger" title="No Customer Records uploaded today"><i class="dashicons dashicons-no"></i> AR Open Items</span>
-        </div>
+        </div> -->
         <div class="crm-form-content">
             
             <div class="crm-tab-container">
                 <div class="crm-tab-selection">
                     <select name="crm_select_table" id="crm_select_table" class="crm-form-control">
                         <option value="file-uploader">File Uploader</option>
-                        <option value="ftp-customer-record">FTP: Customer Records</option>
-                        <option value="ftp-ar-open-items">FTP: AR Open Items</option>
+                        <option value="ftp-customer-record">FTP: Customer Records (Coming soon)</option>
+                        <option value="ftp-ar-open-items">FTP: AR Open Items (Coming soon)</option>
                     </select>
                 </div>
                 <div class="crm-tab-content">
