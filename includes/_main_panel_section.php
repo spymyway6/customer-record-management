@@ -15,7 +15,7 @@
 ?>
 
 <div class="crm-plugin-wrapper wrap">
-    <h2 class="crm-panel-heading">Customer Records Manager <?=$today_date?></h2>
+    <h2 class="crm-panel-heading">Customer Records Manager </h2>
     <div class="crm-widgets">
         <?php
             $ct_date_ctm = date('Y-m-d', strtotime($stats['ct_customer_records']['last_created_at']));
