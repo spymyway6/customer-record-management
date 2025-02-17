@@ -42,6 +42,7 @@
 
                 if($customer_data){
                     $has_inserted = process_csv_data($customer_data);
+                    $upload_result = crm_save_uploaded_file($_FILES['customer_record_files']);
                     if($has_inserted){
                         echo '<div class="updated"><p>'.$has_inserted.'</p></div>';
                     }else{
@@ -58,8 +59,6 @@
                 $err_list .= "<li>$error</li>";
             }
             echo '<div class="error"><ul>'.$err_list.'</ul></div>';
-        } else {
-           
         }
     }
 ?>
@@ -69,12 +68,7 @@
         <h4 class="crmt-title">File Uploader and FTP tools</h4>
     </div>
     <div class="crm-tools-content">
-        <!-- <div class="crm-status-badge">
-            <span class="cbadge crm-success" title="Done uploaded today"><i class="dashicons dashicons-yes"></i> Customers</span>
-            <span class="cbadge crm-danger" title="No Customer Records uploaded today"><i class="dashicons dashicons-no"></i> AR Open Items</span>
-        </div> -->
         <div class="crm-form-content">
-            
             <div class="crm-tab-container">
                 <div class="crm-tab-selection">
                     <select name="crm_select_table" id="crm_select_table" class="crm-form-control">

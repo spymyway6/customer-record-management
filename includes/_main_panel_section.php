@@ -62,14 +62,17 @@
             <div class="crm-tbl-wrapper">
                 <div class="crmt-heading crmt-for-tbl">
                     <h4 class="crmt-title"><?=$table_name;?></h4>
-                    <select name="crm_select_table" id="crm_select_table" class="crm-form-control" onchange="changeTable('<?=$current_url;?>?page=customer-records-manager', this.value)">
-                        <option value="customer-record" <?=($selected_table =='customer-record') ? 'selected' : '';?>>Customer Record Table</option>
-                        <option value="ar-open-items" <?=($selected_table =='ar-open-items') ? 'selected' : '';?>>AR Open Items</option>
-                    </select>
+                    <div class="crm-field-filter-grp">
+                        <input type="search" id="searchInput" placeholder="Search..." class="crm-form-control">
+                        <select name="crm_select_table" id="crm_select_table" class="crm-form-control" onchange="changeTable('<?=$current_url;?>?page=customer-records-manager', this.value)">
+                            <option value="customer-record" <?=($selected_table =='customer-record') ? 'selected' : '';?>>Customer Record Table</option>
+                            <option value="ar-open-items" <?=($selected_table =='ar-open-items') ? 'selected' : '';?>>AR Open Items</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="crm-tbl-content">
                     <?php if($selected_table =='ar-open-items'){ ?>
-                        <table class="crm-table">
+                        <table class="crm-table" id="crmTable">
                             <thead>
                                 <tr>
                                     <th>ID No.</th>
@@ -83,26 +86,28 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if($customer_data){ ?>
-                                    <?php foreach($customer_data as $cd){ ?>
+                                <?php if (!empty($customer_data)) : ?>
+                                    <?php foreach ($customer_data as $cd) : ?>
                                         <tr>
-                                            <th scope="row"><?=$cd['id']; ?></th>
-                                            <td><?=$cd['sell_to_customer_no']; ?></td>
-                                            <td><?=$cd['document_type']; ?></td>
-                                            <td class="price-field"><?=$cd['document_no']; ?></td>
-                                            <td class="price-field"><?=$cd['amount']; ?></td>
-                                            <td class="price-field"><?=$cd['remaining_amount']; ?></td>
-                                            <td class="price-field"><?=date('Y-m-d', strtotime($cd['due_date'])); ?></td>
-                                            <td class="price-field"><?=date('Y-m-d', strtotime($cd['created_at'])); ?></td>
+                                            <th scope="row"><?= esc_html($cd['id'] ?? ''); ?></th>
+                                            <td><?= esc_html($cd['sell_to_customer_no'] ?? ''); ?></td>
+                                            <td><?= esc_html($cd['document_type'] ?? ''); ?></td>
+                                            <td class="price-field"><?= esc_html($cd['document_no'] ?? ''); ?></td>
+                                            <td class="price-field"><?= esc_html($cd['amount'] ?? '0.00'); ?></td>
+                                            <td class="price-field"><?= esc_html($cd['remaining_amount'] ?? '0.00'); ?></td>
+                                            <td class="price-field"><?= esc_html(!empty($cd['due_date']) ? date('Y-m-d', strtotime($cd['due_date'])) : ''); ?></td>
+                                            <td class="price-field"><?= esc_html(!empty($cd['created_at']) ? date('Y-m-d', strtotime($cd['created_at'])) : ''); ?></td>
                                         </tr>
-                                    <?php }; ?>
-                                <?php }else{ ?>
-                                    <tr><th scope="row" colspan="7">No data available</th></tr>
-                                <?php } ?>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <tr>
+                                        <th scope="row" colspan="8">No data available</th>
+                                    </tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     <?php }else{ ?>
-                        <table class="crm-table">
+                        <table class="crm-table" id="crmTable">
                             <thead>
                                 <tr>
                                     <th>ID No.</th>
@@ -117,27 +122,28 @@
                                     <th class="price-field">Date Uploaded</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <?php if($customer_data){ ?>
-                                    <?php foreach($customer_data as $cd){ ?>
+                            <tbody\>
+                                <?php if (!empty($customer_data)) : ?>
+                                    <?php foreach ($customer_data as $cd) : ?>
                                         <tr>
-                                            <th scope="row"><?=$cd['id']; ?></th>
-                                            <td><?=$cd['customer_no']; ?></td>
-                                            <td><?=$cd['retail_locator_status']; ?></td>
-                                            <td><?=$cd['display']; ?></td>
-                                            <td class="price-field"><?=$cd['discount_group']; ?></td>
-                                            <td class="price-field"><?=$cd['ytd_sales']; ?></td>
-                                            <td class="price-field"><?=$cd['prev_ytd_sales']; ?></td>
-                                            <td class="price-field"><?=$cd['discount_amount_level']; ?></td>
-                                            <td class="price-field"><?=$cd['account_balance']; ?></td>
-                                            <td class="price-field"><?=date('Y-m-d', strtotime($cd['created_at'])); ?></td>
+                                            <th scope="row"><?= esc_html($cd['id'] ?? '-'); ?></th>
+                                            <td><?= esc_html($cd['customer_no'] ?? '-'); ?></td>
+                                            <td><?= esc_html($cd['retail_locator_status'] ?? '-'); ?></td>
+                                            <td><?= esc_html($cd['display'] ?? '-'); ?></td>
+                                            <td class="price-field"><?= esc_html($cd['discount_group'] ?? '-'); ?></td>
+                                            <td class="price-field"><?= esc_html($cd['ytd_sales'] ?? '0'); ?></td>
+                                            <td class="price-field"><?= esc_html($cd['prev_ytd_sales'] ?? '0'); ?></td>
+                                            <td class="price-field"><?= esc_html($cd['discount_amount_level'] ?? '0'); ?></td>
+                                            <td class="price-field"><?= esc_html($cd['account_balance'] ?? '0'); ?></td>
+                                            <td class="price-field"><?= esc_html(isset($cd['created_at']) ? date('Y-m-d', strtotime($cd['created_at'])) : '-'); ?></td>
                                         </tr>
-                                    <?php }; ?>
-                                <?php }else{ ?>
-                                    <tr><th scope="row" colspan="7">No data available</th></tr>
-                                <?php } ?>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <tr><th scope="row" colspan="10">No data available</th></tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
+
                     <?php } ?>
                 </div>
             </div>

@@ -54,6 +54,9 @@
     padding: 6px 30px 6px 10px !important;
     border-radius: 6px !important;
 }
+input[type="search"].crm-form-control {
+    padding: 6px 10px 6px 10px !important;
+}
 /* Table CSS */
 .crm-table {
     width: 100%;
@@ -63,6 +66,7 @@
     border: 1px solid #eee; /* Border color */
     padding: 5px;
     text-align: left;
+    transition: .2s;
 }
 .crm-table th {
     background-color: #f7f7f7; /* Light grey for header */
@@ -73,6 +77,9 @@
 }
 .crm-table tr:nth-child(even) {
     background-color: #ffffff; /* White for even rows */
+}
+.crm-table tr:hover td, .crm-table tr:hover th{
+    background-color: #eee !important; /* Light color for odd rows */
 }
 .crm-table .price-field {
     text-align: right; /* Align price column to the right */

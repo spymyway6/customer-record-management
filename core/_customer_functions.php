@@ -129,3 +129,36 @@ function crm_count_all_data() {
 
     return $data;
 }
+
+function crm_save_uploaded_file($file) {
+    if (!isset($file['tmp_name']) || empty($file['tmp_name'])) {
+        return ['error' => 'No file uploaded.'];
+    }
+
+    // Get WordPress upload directory
+    $upload_dir = wp_upload_dir();
+    $plugin_upload_folder = $upload_dir['basedir'] . '/customer-records-plugin/';
+
+    // Create folder if not exists
+    if (!file_exists($plugin_upload_folder)) {
+        wp_mkdir_p($plugin_upload_folder);
+    }
+
+    // Get original filename and extension
+    $file_name = pathinfo($file['name'], PATHINFO_FILENAME);
+    $file_ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+
+    // Generate a new filename with timestamp
+    $timestamp = date('Ymd_His');
+    $new_file_name = sanitize_file_name($file_name . '_' . $timestamp . '.' . $file_ext);
+
+    // Set the full path
+    $file_path = $plugin_upload_folder . $new_file_name;
+
+    // Move the uploaded file
+    if (move_uploaded_file($file['tmp_name'], $file_path)) {
+        return ['success' => true, 'file_url' => $upload_dir['baseurl'] . '/customer-records-plugin/' . $new_file_name];
+    } else {
+        return ['error' => 'Failed to save file.'];
+    }
+}
