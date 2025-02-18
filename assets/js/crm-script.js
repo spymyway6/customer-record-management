@@ -18,3 +18,12 @@ document.addEventListener("DOMContentLoaded", function () {
     searchInput.addEventListener("keyup", filterTable);
     searchInput.addEventListener("input", filterTable);
 });
+
+function chnageTools(value){
+    const currToolsContent = document.getElementById(value);
+    const crmTab = document.querySelectorAll(".crm-tab-content");
+    crmTab.forEach(row => {
+        row.classList.add("d-none");
+    });
+    currToolsContent.classList.remove("d-none");
+}

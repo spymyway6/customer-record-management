@@ -1,3 +1,6 @@
+.d-none{
+    display: none !important;
+}
 .crm-plugin-wrapper {
     background: #FFFAFA;
     border-radius: 6px;
@@ -51,11 +54,19 @@
     padding: 15px 10px;
 }
 .crm-form-control {
-    padding: 6px 30px 6px 10px !important;
+    padding: 6px 10px 6px 10px !important;
     border-radius: 6px !important;
 }
-input[type="search"].crm-form-control {
-    padding: 6px 10px 6px 10px !important;
+.columns {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.crm-form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 /* Table CSS */
 .crm-table {
@@ -123,18 +134,15 @@ input[type="search"].crm-form-control {
     width: 100%;
     margin: 0 !important;
 }
+select#crm_select_table{
+    padding-right: 30px !important;
+}
 input[type=file]#customer_record_files {
     border: 1px solid #eee;
     width: 100%;
     padding: 8px;
     border-radius: 5px;
     background: #eee;
-}
-.crm-form-group p.submit {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: end;
 }
 .crm-form-group p.submit {
     margin: 0;
@@ -151,6 +159,35 @@ input[type=file]#customer_record_files {
     font-size: 12px;
     font-style: italic;
     color: #cc5a00;
+}
+.crm-form-group.crm-btn-grp {
+    flex-direction: row;
+    justify-content: end;
+}
+.crm-form-group.crm-btn-grp.full-width {
+    width: 100%;
+    justify-content: stretch;
+    flex-direction: column;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+.warning.crm-main-btn {
+    width: 100%;
+    display: block;
+    color: #ffffff;
+    background: #ffbd4a !important;
+    border: 1px solid #ffbd4a !important;
+    font-weight: 600;
+    font-size: 16px;
+    transition: .2s;
+}
+.warning.crm-main-btn:hover {
+    background: #b27915 !important;
+    color: #fff;
+}
+.crm-form-group.crm-btn-grp.full-width p.submit {
+    padding: 0;
 }
 /* Widgets */
 .crm-widgets ul {

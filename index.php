@@ -10,11 +10,6 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-// Activation Hook: Create Table if it doesn’t exist
-// register_activation_hook(__FILE__, 'create_customer_records');
-// register_activation_hook(__FILE__, 'create_sell_to_customer');
-
-
 
 function create_customer_records() {
     global $wpdb;
@@ -113,3 +108,45 @@ function customer_records_manager_enqueue_assets_styles($hook) {
 }
 add_action('admin_enqueue_scripts', 'customer_records_manager_enqueue_assets_styles');
 
+// AUTOMATIC FETCH OF DATA BY USING WP CRON JOBS
+// Schedule the cron job if it is not already scheduled
+function crm_schedule_ftp_cron() {
+    if (!wp_next_scheduled('crm_daily_ftp_fetch_event')) {
+        wp_schedule_event(time(), 'daily', 'crm_daily_ftp_fetch_event');
+    }
+}
+add_action('wp', 'crm_schedule_ftp_cron');
+
+function crm_fetch_ftp_files_cron() {
+    $files = crm_fetch_ftp_files();
+    if (!empty($files) && !isset($files['error'])) {
+        $result = crm_process_csv_ftp_files($files);
+        error_log("FTP Files fetched successfully: " . json_encode($result));
+    } else {
+        error_log("FTP Fetch Error: " . $result['error']); // Log errors
+    }
+}
+add_action('crm_daily_ftp_fetch_event', 'crm_fetch_ftp_files_cron');
+
+register_activation_hook(__FILE__, 'crm_schedule_ftp_cron');
+register_deactivation_hook(__FILE__, 'crm_remove_ftp_cron');
+
+function crm_remove_ftp_cron() {
+    wp_clear_scheduled_hook('crm_daily_ftp_fetch_event');
+}
+
+if (defined('DOING_CRON') && DOING_CRON) {
+    $stats = crm_count_all_data();
+    $today_date = date('Y-m-d');
+
+    // Ensure the keys exist before accessing them to avoid warnings
+    $ct_date_ctm = !empty($stats['ct_customer_records']['last_created_at']) 
+        ? date('Y-m-d', strtotime($stats['ct_customer_records']['last_created_at'])) : null;
+    $ct_date_ar_opt = !empty($stats['ct_sell_to_customer']['last_created_at']) 
+        ? date('Y-m-d', strtotime($stats['ct_sell_to_customer']['last_created_at'])) : null;
+
+    // Run cron job only if BOTH dates are NOT equal to today
+    if ($ct_date_ctm !== $today_date && $ct_date_ar_opt !== $today_date) { 
+        do_action('crm_daily_ftp_fetch_event');
+    }
+}

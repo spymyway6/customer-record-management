@@ -162,3 +162,85 @@ function crm_save_uploaded_file($file) {
         return ['error' => 'Failed to save file.'];
     }
 }
+
+// FTP Functionalities
+function crm_fetch_ftp_files() {
+    $ftp_config = get_ftp_config();
+
+    // Validate FTP details
+    if (empty(array_filter($ftp_config))) {
+        return ['error' => 'FTP details are missing. Please configure them first.'];
+    }
+
+    $ftp_server = $ftp_config['crm_ftp_server'];
+    $ftp_user = $ftp_config['crm_ftp_user'];
+    $ftp_pass = $ftp_config['crm_ftp_pass'];
+    $ftp_port = $ftp_config['crm_ftp_port'];
+    $remote_dir = $ftp_config['crm_ftp_remote_dir'];
+    $file_pattern = '*.csv';
+
+    // WordPress upload directory
+    $upload_dir = wp_upload_dir();
+    $local_dir = $upload_dir['basedir'] . '/customer-records-plugin/';
+
+    // Ensure local directory exists
+    if (!file_exists($local_dir)) {
+        wp_mkdir_p($local_dir);
+    }
+
+    // Connect to FTP server
+    $conn_id = @ftp_connect($ftp_server, $ftp_port);
+    if (!$conn_id) {
+        return ['error' => 'Failed to connect to FTP server: ' . $ftp_server . ' on port ' . $ftp_port . '.'];
+    }
+
+    // Attempt FTP login
+    $login_result = @ftp_login($conn_id, $ftp_user, $ftp_pass);
+    if (!$login_result) {
+        ftp_close($conn_id);
+        return ['error' => 'FTP login failed. Please check your username and password.'];
+    }
+
+    // Enable passive mode
+    ftp_pasv($conn_id, true);
+
+    // Get list of files
+    $file_list = @ftp_nlist($conn_id, $remote_dir);
+    if (!$file_list) {
+        ftp_close($conn_id);
+        return ['error' => 'No files found in the FTP directory: ' . $remote_dir . '.'];
+    }
+
+    $downloaded_files = [];
+
+    foreach ($file_list as $remote_file) {
+        if (fnmatch($file_pattern, basename($remote_file))) {
+            $timestamp = date('Ymd_His');
+            $local_file = $local_dir . basename($remote_file, ".csv") . "_{$timestamp}.csv";
+
+            if (@ftp_get($conn_id, $local_file, $remote_file, FTP_BINARY)) {
+                $downloaded_files[] = $local_file;
+            }
+        }
+    }
+
+    // Close FTP connection
+    ftp_close($conn_id);
+
+    return !empty($downloaded_files) ? $downloaded_files : ['error' => 'No matching files were downloaded.'];
+}
+
+function crm_process_csv_ftp_files($files) {
+    foreach ($files as $file) {
+        $customer_data = trim_csv_as_array($file);
+
+        if($customer_data){
+            $has_inserted = process_csv_data($customer_data);
+            if($has_inserted){
+                echo '<div class="updated"><p>'.$has_inserted.'. Please refresh your page.</p></div>';
+            }else{
+                echo '<div class="error"><ul><li>There was a problem inserting your data, maybe the CSV format headers is invalid, empty or unable to be found from the FTP server you are fetching.</li></ul></div>';
+            }
+        }
+    }
+}
